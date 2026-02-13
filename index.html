@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Любовь, Ковид и Ромашка</title>
+    
+    <!-- Библиотеки -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Шрифты -->
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Montserrat', sans-serif; background-color: #ffffff; overscroll-behavior: none; }
         @media (min-width: 768px) { body { background-color: #e5e7eb; } }
@@ -23,7 +28,9 @@
 </head>
 <body>
     <div id="root"></div>
+
     <script type="text/babel">
+        // Получаем хуки из глобального объекта React (без import)
         const { useState, useEffect, useRef } = React;
         
         // --- ИКОНКИ ---
@@ -176,6 +183,8 @@
             }
         ];
 
+        // --- КОМПОНЕНТЫ ---
+        
         const LoveCounter = () => {
             const startDate = new Date('2018-06-01');
             const [diff, setDiff] = useState({ years: 0, days: 0 });
@@ -225,14 +234,12 @@
             const checkScroll = () => {
                 if (scrollRef.current) {
                     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-                    // Показываем стрелку, если контент больше экрана и мы не внизу
-                    // 20px - небольшой буфер
                     setShowScroll(scrollHeight > clientHeight && scrollTop + clientHeight < scrollHeight - 20);
                 }
             };
 
             useEffect(() => {
-                checkScroll(); // Проверка при загрузке
+                checkScroll();
                 const currentRef = scrollRef.current;
                 if (currentRef) {
                     currentRef.addEventListener('scroll', checkScroll);
@@ -244,7 +251,7 @@
                     }
                     window.removeEventListener('resize', checkScroll);
                 };
-            }, [data]); // При смене страницы перепроверяем
+            }, [data]);
 
             const handleScrollClick = () => {
                 if (scrollRef.current) {
@@ -254,6 +261,7 @@
 
             return (
                 <div className="fade-in w-full h-full bg-white shadow-2xl overflow-hidden relative flex flex-col font-sans">
+                    {/* Прогресс-бар */}
                     <div className="h-1.5 bg-gray-100 w-full flex shrink-0">
                             {bookData.map((_, idx) => (
                                 <div 
@@ -394,7 +402,33 @@
             );
         };
 
-        // Запуск React приложения
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState(0);
+
+            const nextPage = () => {
+                if (currentPage < bookData.length - 1) setCurrentPage(p => p + 1);
+            };
+
+            const prevPage = () => {
+                if (currentPage > 0) setCurrentPage(p => p - 1);
+            };
+
+            return (
+                <div className="min-h-screen bg-white md:bg-gray-200 flex items-center justify-center p-0 md:p-4 font-sans text-gray-900">
+                    <div className="w-full h-[100dvh] md:max-w-md md:h-[850px] md:rounded-[2.5rem] overflow-hidden bg-white md:shadow-2xl md:ring-8 md:ring-gray-900/5 relative">
+                        <Page 
+                            data={bookData[currentPage]} 
+                            isActive={true}
+                            onNext={nextPage}
+                            onPrev={prevPage}
+                            isFirst={currentPage === 0}
+                            isLast={currentPage === bookData.length - 1}
+                        />
+                    </div>
+                </div>
+            );
+        };
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
