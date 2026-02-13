@@ -1,283 +1,405 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
+  <html lang="ru">
+  <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Любовь, Ковид и Ромашка</title>
-    
-    <!-- Подключаем React и Tailwind CSS -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Шрифты -->
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
-    
     <style>
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #e5e7eb;
-            margin: 0;
-            padding: 0;
-            overscroll-behavior: none;
-        }
-        .font-serif { font-family: 'Merriweather', serif; }
-        .font-sans { font-family: 'Montserrat', sans-serif; }
+      body { font-family: 'Montserrat', sans-serif; background-color: #e5e7eb; }
+      .font-serif { font-family: 'Merriweather', serif; }
+      .heart-beat { animation: heartbeat 1.5s infinite; }
+      @keyframes heartbeat { 0% { transform: scale(1); } 15% { transform: scale(1.3); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } 60% { transform: scale(1); } }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      
+      // ... import React, { useState, useEffect } from 'react';
+
+// --- ИКОНКИ (Встроены, чтобы работать без установки библиотек) ---
+const Icons = {
+    Heart: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
+    ChevronLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
+    ChevronRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+    Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+    MessageCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>,
+    ImageIcon: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>,
+    Smile: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>,
+    Coffee: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>,
+    Hammer: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/><path d="M17.64 15 22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V2.46V2a2 2 0 0 0-2-2H9.21a2 2 0 0 0-2 2v5.76c0 .85-.33 1.65-.93 2.25L2 14.36"/></svg>,
+    Baby: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/></svg>
+};
+
+// --- ДАННЫЕ КНИГИ ---
+const bookData = [
+    {
+        id: 'cover',
+        type: 'cover',
+        title: "Любовь, Ковид и Ромашка",
+        subtitle: "Или краткая история того, как мы не убили друг друга за 8 лет",
+        image: "https://placehold.co/600x800/fce7f3/db2777?text=Наше+Фото+Здесь", 
+        text: "Посвящается Насте. Моей жене, матери драконов (Киры и Ромы) и главному прорабу нашей бесконечной стройки."
+    },
+    {
+        id: 'prologue',
+        type: 'chapter',
+        chapter: "Пролог",
+        title: "64 Мегабайта жизни",
+        year: "Начало начал",
+        icon: "💾",
+        text: "Если распечатать нашу переписку, бумаги хватит, чтобы обклеить квартиру вместо обоев (кстати, не подавай мне идей для ремонта). Но если выжать из этих 64 мегабайт суть, останется главное: мы начали с нелепых стикеров, а пришли к тому, что спорим про розетки Werkel. И это было лучшее приключение в моей жизни."
+    },
+    {
+        id: 'ch1',
+        type: 'chapter',
+        chapter: "Глава 1",
+        title: "Лок куричам и Гусеницы",
+        year: "2018",
+        icon: "🐛",
+        image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+2018+(Стикеры)",
+        content: (
+            <React.Fragment>
+                <p className="mb-4">Июнь 2018 года. Эпоха, когда мы еще высыпались. Мы начали общаться не с высоких материй, а с проверки на прочность. Я слал тебе стикеров с упоротыми гусеницами.</p>
+                <div className="mb-4 italic border-l-4 border-pink-400 pl-4 bg-pink-50 p-2 rounded-r">
+                    <p>— Виджаолынен.</p>
+                    <p>— Лок куричам.</p>
+                </div>
+                <p>Для всего мира это набор звуков. Для нас это означало: «Мы на одной волне». Мы гуляли, обсуждали Burning Man и мою «одну песню на гитаре».</p>
+            </React.Fragment>
+        )
+    },
+    {
+        id: 'ch2',
+        type: 'chapter',
+        chapter: "Глава 2",
+        title: "Ковидный бункер",
+        year: "2020",
+        icon: "🏠",
+        image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+в+масках+или+дома",
+        content: (
+            <React.Fragment>
+                <p className="mb-4">Мир сошел с ума. Ты пишешь: <b>«У нас карантин»</b>. Я (с оптимизмом): <b>«Охуенно»</b>.</p>
+                <p className="mb-4">Это был наш краш-тест. 24/7 вместе. Ты рулила Европой через Zoom, я старался не греметь посудой. </p>
+                <p>Мы выяснили главное: мы можем находиться в замкнутом пространстве и не хотеть убить друг друга. Максимум — слегка покусать. Мы стали командой.</p>
+            </React.Fragment>
+        )
+    },
+    {
+        id: 'ch3',
+        type: 'chapter',
+        chapter: "Глава 3",
+        title: "Кира и Великий Рис",
+        year: "2021-2023",
+        icon: "🍚",
+        image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+Киры",
+        content: (
+            <React.Fragment>
+                <p className="mb-4">С появлением Киры чат стал медицинским справочником. «Тихо! Она спит» — наш девиз.</p>
+                <p className="mb-4">Январь 2022. Кира выдает базу: <b>«Снег — это рис»</b>. И ведь не поспоришь.</p>
+                <p>Были и мокрые трусы, и разрисованные обои. Мы учились быть родителями без инструкции, чисто на интуиции и любви.</p>
+            </React.Fragment>
+        )
+    },
+    {
+        id: 'ch4',
+        type: 'chapter',
+        chapter: "Глава 4",
+        title: "Империя Романа",
+        year: "2024-2025",
+        icon: "🏛️",
+        image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+Ромы+или+Выписка",
+        content: (
+            <React.Fragment>
+                <p className="mb-4">Великие дебаты имен. Максим? Денис? Победил Римлянин. Ромиус. Ромашка.</p>
+                <p className="mb-4">Март 2025-го. Больницы, соседки по палате, мои попытки не забыть детей при сборах. </p>
+                <p>Рома ворвался громко. Теперь у нас комплект: Кира учит брата жизни, а Рома просто хочет на ручки.</p>
+            </React.Fragment>
+        )
+    },
+    {
+        id: 'ch5',
+        type: 'chapter',
+        chapter: "Глава 5",
+        title: "Бесконечный Ремонт",
+        year: "2026",
+        icon: "🔌",
+        image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+Ремонта+или+Леруа",
+        content: (
+            <React.Fragment>
+                <p className="mb-4">Если мы пережили Ковид и двоих детей, то ремонт... это финальный босс.</p>
+                <div className="bg-white p-3 rounded-lg shadow-md border border-gray-100 text-sm text-gray-700 mb-4">
+                    <p className="mb-1"><span className="font-bold text-pink-600">Настя:</span> (Ссылка на розетку Werkel) Нам нужно 15 штук.</p>
+                    <p className="mb-1"><span className="font-bold text-blue-600">Витя:</span> То есть ты точно уверена, что за 3 мес мы ремонт не закончим))</p>
+                    <p><span className="font-bold text-pink-600">Настя:</span> Едь в Леруа.</p>
+                </div>
+                <p>Но даже когда я ворчу в пробке, я знаю: я еду в наш дом. Который мы строим вместе.</p>
+            </React.Fragment>
+        )
+    },
+    {
+        id: 'stats',
+        type: 'stats',
+        title: "Наша статистика",
+        subtitle: "Магия больших чисел",
+        stats: [
+            { label: "Сообщений", value: "154,302", icon: <Icons.MessageCircle />, color: "bg-blue-100 text-blue-600" },
+            { label: "Фотографий", value: "12,400", icon: <Icons.ImageIcon />, color: "bg-purple-100 text-purple-600" },
+            { label: "Стикеров", value: "8,921", icon: <Icons.Smile />, color: "bg-yellow-100 text-yellow-600" },
+            { label: "Дней без сна", value: "∞", icon: <Icons.Coffee />, color: "bg-amber-100 text-amber-700" },
+            { label: "Детей", value: "2", icon: <Icons.Baby />, color: "bg-pink-100 text-pink-600" },
+            { label: "Ремонтов", value: "1", icon: <Icons.Hammer />, color: "bg-slate-100 text-slate-600" }
+        ]
+    },
+    {
+        id: 'epilogue',
+        type: 'epilogue',
+        title: "Эпилог",
+        content: (
+            <React.Fragment>
+                <p className="mb-6 font-serif text-lg">Настя,<br/>Ты подарила мне Киру (которая видит рис вместо снега).<br/>Ты подарила мне Рому.<br/>Ты подарила мне седые волосы (немного) и бесконечное счастье (много).</p>
+                <p className="mb-6">Спасибо, что терпишь мои шутки и стряпню. <br/>Я люблю тебя.</p>
+                <p className="font-bold text-xl text-pink-600">С 14 февраля!</p>
+                <p className="mt-8 text-sm text-gray-500">Твой Витя 👨🏻‍🍳</p>
+            </React.Fragment>
+        )
+    }
+];
+
+// --- КОМПОНЕНТЫ ---
+
+const LoveCounter = () => {
+    const startDate = new Date('2018-06-01');
+    const [diff, setDiff] = useState({ years: 0, days: 0 });
+
+    useEffect(() => {
+        const calculateTime = () => {
+            const now = new Date();
+            const diffTime = Math.abs(now - startDate);
+            const diffDaysTotal = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const years = Math.floor(diffDaysTotal / 365);
+            const days = diffDaysTotal % 365;
+            setDiff({ years, days });
+        };
         
+        calculateTime();
+        const timer = setInterval(calculateTime, 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <div className="text-center py-4 bg-white/60 backdrop-blur-sm rounded-xl my-4 mx-4 shadow-sm border border-pink-100">
+            <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Мы вместе уже</p>
+            <div className="flex justify-center items-baseline gap-2 text-pink-600 font-bold">
+                <span className="text-2xl">{diff.years}</span><span className="text-sm font-normal text-gray-500">лет</span>
+                <span className="text-2xl">{diff.days}</span><span className="text-sm font-normal text-gray-500">дней</span>
+            </div>
+        </div>
+    );
+};
+
+const StatCard = ({ label, value, icon, color }) => (
+    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2 transition hover:scale-105 hover:shadow-md">
+        <div className={`p-3 rounded-full ${color} mb-1`}>
+            {icon}
+        </div>
+        <span className="text-2xl font-extrabold text-gray-800 font-sans">{value}</span>
+        <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{label}</span>
+    </div>
+);
+
+const Page = ({ data, isActive, onNext, onPrev, isFirst, isLast }) => {
+    if (!isActive) return null;
+
+    return (
+        <div className="fade-in w-full h-full bg-white shadow-2xl overflow-hidden relative flex flex-col font-sans">
+            {/* Прогресс-бар */}
+            <div className="h-1.5 bg-gray-100 w-full flex shrink-0">
+                    {bookData.map((_, idx) => (
+                        <div 
+                        key={idx} 
+                        className={`h-full flex-1 border-r border-white transition-colors duration-300 ${data.id === bookData[idx].id ? 'bg-pink-500' : 'bg-pink-100'}`}
+                        ></div>
+                    ))}
+            </div>
+
+            <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
+                {/* Обложка */}
+                {data.type === 'cover' && (
+                    <div className="flex flex-col items-center justify-center min-h-full p-8 text-center bg-gradient-to-br from-pink-50 via-white to-pink-100">
+                        <div className="text-6xl mb-6 text-pink-500 heart-beat drop-shadow-sm">❤️</div>
+                        <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-800 mb-4 leading-tight">{data.title}</h1>
+                        <p className="text-gray-600 italic mb-8 px-4 border-t border-b border-pink-200 py-4">{data.subtitle}</p>
+                        <div className="w-full max-w-xs aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden mb-8 shadow-lg relative transform rotate-1 border-4 border-white">
+                            <img src={data.image} alt="Cover" className="w-full h-full object-cover" />
+                        </div>
+                        <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Аннотация</p>
+                        <p className="text-sm text-gray-600 max-w-xs mx-auto leading-relaxed">{data.text}</p>
+                    </div>
+                )}
+
+                {/* Главы */}
+                {data.type === 'chapter' && (
+                    <div className="p-6 md:p-8">
+                        <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
+                            <span className="text-pink-500 font-bold tracking-widest text-xs uppercase bg-pink-50 px-2 py-1 rounded-full">{data.chapter}</span>
+                            <span className="text-gray-400 font-bold text-xs font-mono">{data.year}</span>
+                        </div>
+                        
+                        <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-800 mb-2 leading-snug">{data.title}</h2>
+                        
+                        <div className="flex justify-center my-6">
+                            <div className="w-16 h-16 bg-pink-50 rounded-full flex items-center justify-center text-3xl shadow-inner">
+                                {data.icon}
+                            </div>
+                        </div>
+                        
+                        {data.image && (
+                                <div className="w-full h-56 bg-gray-100 rounded-xl overflow-hidden mb-8 shadow-md relative group">
+                                <img src={data.image} alt={data.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-105" />
+                                </div>
+                        )}
+
+                        <div className="prose prose-pink text-gray-700 leading-relaxed font-serif text-lg">
+                            {data.content ? data.content : <p>{data.text}</p>}
+                        </div>
+                    </div>
+                )}
+
+                {/* Статистика */}
+                {data.type === 'stats' && (
+                     <div className="p-6 md:p-8 min-h-full bg-slate-50">
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl font-serif font-bold text-gray-800 mb-2">{data.title}</h2>
+                            <p className="text-gray-500">{data.subtitle}</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            {data.stats.map((stat, idx) => (
+                                <StatCard key={idx} {...stat} />
+                            ))}
+                        </div>
+
+                        <div className="mt-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                             <h3 className="text-lg font-bold text-gray-700 mb-4">Ещё немного фактов:</h3>
+                             <ul className="space-y-3">
+                                <li className="flex items-start gap-3 text-gray-600">
+                                    <span className="text-pink-500 font-bold">•</span>
+                                    <span>Вес архива переписки: <b>64 MB</b> (это как 45,000 страниц «Войны и Мира»)</span>
+                                </li>
+                                <li className="flex items-start gap-3 text-gray-600">
+                                    <span className="text-pink-500 font-bold">•</span>
+                                    <span>Количество слов «Люблю»: <b>Не поддается исчислению</b></span>
+                                </li>
+                             </ul>
+                        </div>
+                     </div>
+                )}
+
+                {/* Эпилог */}
+                {data.type === 'epilogue' && (
+                    <div className="p-8 min-h-full flex flex-col justify-center text-center bg-gradient-to-t from-pink-50 via-white to-white">
+                        <div className="flex justify-center mb-6">
+                            <Icons.Zap />
+                        </div>
+                        <h2 className="text-3xl font-serif font-bold text-gray-800 mb-8">{data.title}</h2>
+                        
+                        <LoveCounter />
+
+                        <div className="bg-white p-8 rounded-2xl shadow-xl border border-pink-100 my-8 transform -rotate-1 relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-2 bg-pink-400"></div>
+                            {data.content}
+                        </div>
+
+                        <div className="mt-auto">
+                            <button 
+                                onClick={() => alert('Я тоже тебя люблю! ❤️')}
+                                className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-8 py-4 rounded-full font-bold shadow-lg shadow-pink-200 hover:shadow-xl hover:scale-105 transition-all duration-300 w-full flex items-center justify-center gap-2"
+                            >
+                                <Icons.Heart />
+                                Сказать «Люблю»
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Навигация */}
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-100 flex justify-between items-center z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                <button 
+                    onClick={onPrev} 
+                    disabled={isFirst}
+                    className={`p-3 rounded-full transition-all ${isFirst ? 'text-gray-300' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-600 active:scale-95'}`}
+                >
+                    <Icons.ChevronLeft />
+                </button>
+                
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    {data.type === 'cover' ? 'Начало' : data.type === 'epilogue' ? 'Конец' : 'Страница'}
+                </span>
+
+                <button 
+                    onClick={onNext} 
+                    disabled={isLast}
+                    className={`p-3 rounded-full transition-all ${isLast ? 'text-gray-300' : 'text-gray-700 hover:bg-pink-50 hover:text-pink-600 active:scale-95'}`}
+                >
+                    <Icons.ChevronRight />
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// --- ОСНОВНОЙ КОМПОНЕНТ ---
+
+const GlobalStyles = () => (
+    <style>{`
         .fade-in { animation: fadeIn 0.8s ease-in-out; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        .heart-beat { animation: heartbeat 1.5s infinite; }
-        @keyframes heartbeat {
-            0% { transform: scale(1); }
-            15% { transform: scale(1.3); }
-            30% { transform: scale(1); }
-            45% { transform: scale(1.15); }
-            60% { transform: scale(1); }
-        }
+    `}</style>
+);
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
+export default function App() {
+    const [currentPage, setCurrentPage] = useState(0);
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        
-        // --- ИКОНКИ ---
-        const Icons = {
-            Heart: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>,
-            ChevronLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
-            ChevronRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
-            Zap: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-            MessageCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>,
-            ImageIcon: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>,
-            Smile: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>,
-            Coffee: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>,
-            Hammer: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/><path d="M17.64 15 22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25V2.46V2a2 2 0 0 0-2-2H9.21a2 2 0 0 0-2 2v5.76c0 .85-.33 1.65-.93 2.25L2 14.36"/></svg>,
-            Baby: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/></svg>
-        };
+    const nextPage = () => {
+        if (currentPage < bookData.length - 1) setCurrentPage(p => p + 1);
+    };
 
-        // --- ДАННЫЕ КНИГИ ---
-        // Сюда можно вставлять ссылки на ваши фото
-        const bookData = [
-            {
-                id: 'cover',
-                type: 'cover',
-                title: "Любовь, Ковид и Ромашка",
-                subtitle: "Или краткая история того, как мы не убили друг друга за 8 лет",
-                image: "https://placehold.co/600x800/fce7f3/db2777?text=Наше+Фото+Здесь", 
-                text: "Посвящается Насте. Моей жене, матери драконов (Киры и Ромы) и главному прорабу нашей бесконечной стройки."
-            },
-            {
-                id: 'prologue',
-                type: 'chapter',
-                chapter: "Пролог",
-                title: "64 Мегабайта жизни",
-                year: "Начало начал",
-                icon: "💾",
-                text: "Если распечатать нашу переписку, бумаги хватит, чтобы обклеить квартиру вместо обоев (кстати, не подавай мне идей для ремонта). Но если выжать из этих 64 мегабайт суть, останется главное: мы начали с нелепых стикеров, а пришли к тому, что спорим про розетки Werkel. И это было лучшее приключение в моей жизни."
-            },
-            {
-                id: 'ch1',
-                type: 'chapter',
-                chapter: "Глава 1",
-                title: "Лок куричам и Гусеницы",
-                year: "2018",
-                icon: "🐛",
-                image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+2018+(Стикеры)",
-                content: (
-                    <React.Fragment>
-                        <p className="mb-4">Июнь 2018 года. Эпоха, когда мы еще высыпались. Мы начали общаться не с высоких материй, а с проверки на прочность. Я слал тебе стикеров с упоротыми гусеницами.</p>
-                        <div className="mb-4 italic border-l-4 border-pink-400 pl-4 bg-pink-50 p-2 rounded-r">
-                            <p>— Виджаолынен.</p>
-                            <p>— Лок куричам.</p>
-                        </div>
-                        <p>Для всего мира это набор звуков. Для нас это означало: «Мы на одной волне». Мы гуляли, обсуждали Burning Man и мою «одну песню на гитаре».</p>
-                    </React.Fragment>
-                )
-            },
-            {
-                id: 'ch2',
-                type: 'chapter',
-                chapter: "Глава 2",
-                title: "Ковидный бункер",
-                year: "2020",
-                icon: "🏠",
-                image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+в+масках+или+дома",
-                content: (
-                    <React.Fragment>
-                        <p className="mb-4">Мир сошел с ума. Ты пишешь: <b>«У нас карантин»</b>. Я (с оптимизмом): <b>«Охуенно»</b>.</p>
-                        <p className="mb-4">Это был наш краш-тест. 24/7 вместе. Ты рулила Европой через Zoom, я старался не греметь посудой. </p>
-                        <p>Мы выяснили главное: мы можем находиться в замкнутом пространстве и не хотеть убить друг друга. Максимум — слегка покусать. Мы стали командой.</p>
-                    </React.Fragment>
-                )
-            },
-            {
-                id: 'ch3',
-                type: 'chapter',
-                chapter: "Глава 3",
-                title: "Кира и Великий Рис",
-                year: "2021-2023",
-                icon: "🍚",
-                image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+Киры",
-                content: (
-                    <React.Fragment>
-                        <p className="mb-4">С появлением Киры чат стал медицинским справочником. «Тихо! Она спит» — наш девиз.</p>
-                        <p className="mb-4">Январь 2022. Кира выдает базу: <b>«Снег — это рис»</b>. И ведь не поспоришь.</p>
-                        <p>Были и мокрые трусы, и разрисованные обои. Мы учились быть родителями без инструкции, чисто на интуиции и любви.</p>
-                    </React.Fragment>
-                )
-            },
-            {
-                id: 'ch4',
-                type: 'chapter',
-                chapter: "Глава 4",
-                title: "Империя Романа",
-                year: "2024-2025",
-                icon: "🏛️",
-                image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+Ромы+или+Выписка",
-                content: (
-                    <React.Fragment>
-                        <p className="mb-4">Великие дебаты имен. Максим? Денис? Победил Римлянин. Ромиус. Ромашка.</p>
-                        <p className="mb-4">Март 2025-го. Больницы, соседки по палате, мои попытки не забыть детей при сборах. </p>
-                        <p>Рома ворвался громко. Теперь у нас комплект: Кира учит брата жизни, а Рома просто хочет на ручки.</p>
-                    </React.Fragment>
-                )
-            },
-            {
-                id: 'ch5',
-                type: 'chapter',
-                chapter: "Глава 5",
-                title: "Бесконечный Ремонт",
-                year: "2026",
-                icon: "🔌",
-                image: "https://placehold.co/600x400/e2e8f0/64748b?text=Фото+Ремонта+или+Леруа",
-                content: (
-                    <React.Fragment>
-                        <p className="mb-4">Если мы пережили Ковид и двоих детей, то ремонт... это финальный босс.</p>
-                        <div className="bg-white p-3 rounded-lg shadow-md border border-gray-100 text-sm text-gray-700 mb-4">
-                            <p className="mb-1"><span className="font-bold text-pink-600">Настя:</span> (Ссылка на розетку Werkel) Нам нужно 15 штук.</p>
-                            <p className="mb-1"><span className="font-bold text-blue-600">Витя:</span> То есть ты точно уверена, что за 3 мес мы ремонт не закончим))</p>
-                            <p><span className="font-bold text-pink-600">Настя:</span> Едь в Леруа.</p>
-                        </div>
-                        <p>Но даже когда я ворчу в пробке, я знаю: я еду в наш дом. Который мы строим вместе.</p>
-                    </React.Fragment>
-                )
-            },
-            {
-                id: 'stats',
-                type: 'stats',
-                title: "Наша статистика",
-                subtitle: "Магия больших чисел",
-                stats: [
-                    { label: "Сообщений", value: "154,302", icon: <Icons.MessageCircle />, color: "bg-blue-100 text-blue-600" },
-                    { label: "Фотографий", value: "12,400", icon: <Icons.ImageIcon />, color: "bg-purple-100 text-purple-600" },
-                    { label: "Стикеров", value: "8,921", icon: <Icons.Smile />, color: "bg-yellow-100 text-yellow-600" },
-                    { label: "Дней без сна", value: "∞", icon: <Icons.Coffee />, color: "bg-amber-100 text-amber-700" },
-                    { label: "Детей", value: "2", icon: <Icons.Baby />, color: "bg-pink-100 text-pink-600" },
-                    { label: "Ремонтов", value: "1", icon: <Icons.Hammer />, color: "bg-slate-100 text-slate-600" }
-                ]
-            },
-            {
-                id: 'epilogue',
-                type: 'epilogue',
-                title: "Эпилог",
-                content: (
-                    <React.Fragment>
-                        <p className="mb-6 font-serif text-lg">Настя,<br/>Ты подарила мне Киру (которая видит рис вместо снега).<br/>Ты подарила мне Рому.<br/>Ты подарила мне седые волосы (немного) и бесконечное счастье (много).</p>
-                        <p className="mb-6">Спасибо, что терпишь мои шутки и стряпню. <br/>Я люблю тебя.</p>
-                        <p className="font-bold text-xl text-pink-600">С 14 февраля!</p>
-                        <p className="mt-8 text-sm text-gray-500">Твой Витя 👨🏻‍🍳</p>
-                    </React.Fragment>
-                )
-            }
-        ];
+    const prevPage = () => {
+        if (currentPage > 0) setCurrentPage(p => p - 1);
+    };
 
-        // --- КОМПОНЕНТЫ ---
-
-        const LoveCounter = () => {
-            const startDate = new Date('2018-06-01');
-            const [diff, setDiff] = useState({ years: 0, days: 0 });
-
-            useEffect(() => {
-                const calculateTime = () => {
-                    const now = new Date();
-                    const diffTime = Math.abs(now - startDate);
-                    const diffDaysTotal = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                    const years = Math.floor(diffDaysTotal / 365);
-                    const days = diffDaysTotal % 365;
-                    setDiff({ years, days });
-                };
-                
-                calculateTime();
-                const timer = setInterval(calculateTime, 60000);
-                return () => clearInterval(timer);
-            }, []);
-
-            return (
-                <div className="text-center py-4 bg-white/60 backdrop-blur-sm rounded-xl my-4 mx-4 shadow-sm border border-pink-100">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Мы вместе уже</p>
-                    <div className="flex justify-center items-baseline gap-2 text-pink-600 font-bold">
-                        <span className="text-2xl">{diff.years}</span><span className="text-sm font-normal text-gray-500">лет</span>
-                        <span className="text-2xl">{diff.days}</span><span className="text-sm font-normal text-gray-500">дней</span>
-                    </div>
-                </div>
-            );
-        };
-
-        const StatCard = ({ label, value, icon, color }) => (
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-2 transition hover:scale-105 hover:shadow-md">
-                <div className={`p-3 rounded-full ${color} mb-1`}>
-                    {icon}
-                </div>
-                <span className="text-2xl font-extrabold text-gray-800 font-sans">{value}</span>
-                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{label}</span>
+    return (
+        <div className="min-h-screen bg-gray-200 flex items-center justify-center p-0 md:p-4 font-sans text-gray-900">
+            <GlobalStyles />
+            <div className="w-full max-w-md h-[100dvh] md:h-[850px] md:rounded-[2.5rem] overflow-hidden shadow-2xl ring-8 ring-gray-900/5 bg-white">
+                <Page 
+                    data={bookData[currentPage]} 
+                    isActive={true}
+                    onNext={nextPage}
+                    onPrev={prevPage}
+                    isFirst={currentPage === 0}
+                    isLast={currentPage === bookData.length - 1}
+                />
             </div>
-        );
-
-        const Page = ({ data, isActive, onNext, onPrev, isFirst, isLast }) => {
-            if (!isActive) return null;
-
-            return (
-                <div className="fade-in w-full h-full bg-white shadow-2xl overflow-hidden relative flex flex-col font-sans">
-                    {/* Прогресс-бар */}
-                    <div className="h-1.5 bg-gray-100 w-full flex shrink-0">
-                            {bookData.map((_, idx) => (
-                                <div 
-                                key={idx} 
-                                className={`h-full flex-1 border-r border-white transition-colors duration-300 ${data.id === bookData[idx].id ? 'bg-pink-500' : 'bg-pink-100'}`}
-                                ></div>
-                            ))}
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto no-scrollbar pb-24">
-                        {/* Обложка */}
-                        {data.type === 'cover' && (
-                            <div className="flex flex-col items-center justify-center min-h-full p-8 text-center bg-gradient-to-br from-pink-50 via-white to-pink-100">
-                                <div className="text-6xl mb-6 text-pink-500 heart-beat drop-shadow-sm">❤️</div>
-                                <h1 className="text-3xl md:text-4xl font-serif font-bold text-gray-800 mb-4 leading-tight">{data.title}</h1>
-                                <p className="text-gray-600 italic mb-8 px-4 border-t border-b border-pink-200 py-4">{data.subtitle}</p>
-                                <div className="w-full max-w-xs aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden mb-8 shadow-lg relative transform rotate-1 border-4 border-white">
-                                    <img src={data.image} alt="Cover" className="w-full h-full object-cover" />
-                                </div>
-                                <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Аннотация</p>
-                                <p className="text-sm text-gray-600 max-w-xs mx-auto leading-relaxed">{data.text}</p>
-                            </div>
-                        )}
-
-                        {/* Главы */}
-                        {data.type === 'chapter' && (
-                            <div className="p-6 md:p-8">
-                                <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
-                                    <span className="text-pink-500 font-bold tracking-widest text-xs uppercase bg-pink-50 px-2 py-1 rounded-full">{data.chapter}</span>
-                                    <span className="text-gray-400 font-bold text-xs font-mono">{data.year}</span>
-                                </div>
-                                
-                                <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-800 mb-2 leading-snug">{data.title}</h2>
+        </div>
+    ); ...
+      // ... И В КОНЦЕ ДОБАВЬТЕ: ...
+      
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
+      
+    </script>
+  </body>
+  </html>
